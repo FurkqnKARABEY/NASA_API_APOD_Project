@@ -1,90 +1,107 @@
-# NASA_API_APOD_Project
-import requests
-import datetime
-import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
-import io
+# NASA APOD API Project
 
-# NASA API Anahtarı (Gerçek API anahtarını kullan)
-API_KEY = "bZFN1Htu4LbzzQTAqFvf3Jg703Eega2bL9P6ZRmq"
+A small Python project that fetches recent Astronomy Picture of the Day (APOD) data from NASA's public API and displays the first available image with its metadata.
 
-# API URL'leri
-APOD_URL = "https://api.nasa.gov/planetary/apod"
+## Project Purpose
 
-# Tarih aralığı (Son 7 gün)
-today = datetime.date.today()
-start_date = today - datetime.timedelta(days=7)
+This project demonstrates basic API consumption, JSON response handling, image downloading, and simple data visualization in Python.
 
-start_date_str = start_date.strftime('%Y-%m-%d')
-end_date_str = today.strftime('%Y-%m-%d')
+It is useful for practicing:
 
-# APOD verisini çekme fonksiyonu
-def get_apod_data():
-    params = {
-        'api_key': API_KEY,
-        'start_date': start_date_str,
-        'end_date': end_date_str
-    }
-    
-    response = requests.get(APOD_URL, params=params)
-    apod_images = []
-    
-    if response.status_code == 200:
-        apod_data = response.json()
-        
-        # API'den dönen veri bir liste mi?
-        if isinstance(apod_data, list):
-            entries = apod_data
-        elif isinstance(apod_data, dict) and "date" in apod_data:
-            entries = [apod_data]  # Tek bir giriş varsa listeye çevir
-        else:
-            print("Beklenmeyen JSON formatı:", apod_data)
-            return []
+- Working with external REST APIs
+- Managing API keys securely with environment variables
+- Parsing JSON responses
+- Filtering image-based APOD results
+- Downloading and displaying remote images
+- Basic visualization with Matplotlib
 
-        for entry in entries:
-            # Eğer görsel içeriği varsa ekleyelim
-            if "url" in entry and (entry['url'].endswith(".jpg") or entry['url'].endswith(".png")):
-                apod_images.append(entry['url'])
-                print(f"Tarih: {entry['date']}")
-                print(f"Başlık: {entry['title']}")
-                print(f"Açıklama: {entry['explanation']}")
-                print(f"Görsel URL: {entry['url']}\n")
-    
-    else:
-        print(f"APOD verisi çekilirken hata oluştu: {response.status_code}")
+## Features
 
-    return apod_images
+- Fetches APOD records for the last 7 days
+- Prints APOD date, title, explanation, and image URL
+- Filters results to image files (`.jpg`, `.png`)
+- Downloads the first available image result
+- Displays the image using Matplotlib
+- Keeps the NASA API key outside the source code
 
-# Grafik gösterme fonksiyonu
-def plot_graphs():
-    apod_images = get_apod_data()
-    
-    if not apod_images:
-        print("Görüntü bulunamadı.")
-        return
+## Tech Stack
 
-    try:
-        response = requests.get(apod_images[0], stream=True)
-        response.raw.decode_content = True
+- Python
+- NASA APOD API
+- Requests
+- Matplotlib
+- NumPy
+- Pillow
+- python-dotenv
 
-        # Resmin uygun formatta olup olmadığını kontrol et
-        content_type = response.headers.get('Content-Type', '')
-        if 'image' not in content_type:
-            print(f"Hata: İçerik görsel değil ({content_type})")
-            return
+## Project Structure
 
-        img = Image.open(io.BytesIO(response.content))
-        image_np = np.array(img)
+```text
+NASA_API_APOD_Project/
+├── app.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+└── README.md
+```
 
-        fig, ax = plt.subplots(figsize=(10, 6))
-        ax.imshow(image_np, aspect='auto')
-        ax.axis('off')
-        ax.set_title("Astronomy Picture of the Day (APOD) - İlk Görsel", fontsize=14)
-        plt.show()
+## Setup
 
-    except Exception as e:
-        print(f"Görsel yüklenirken bir hata oluştu: {e}")
+Clone the repository:
 
-# Fonksiyonu çalıştır
-plot_graphs()
+```bash
+git clone https://github.com/FurkqnKARABEY/NASA_API_APOD_Project.git
+cd NASA_API_APOD_Project
+```
+
+Create and activate a virtual environment:
+
+```bash
+python -m venv .venv
+```
+
+Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+macOS / Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create your local `.env` file:
+
+```bash
+cp .env.example .env
+```
+
+Then add your NASA API key:
+
+```env
+NASA_API_KEY=your_nasa_api_key_here
+```
+
+You can get a NASA API key from NASA's official API portal.
+
+## Run
+
+```bash
+python app.py
+```
+
+## Security Note
+
+Do not commit real API keys, tokens, passwords, or `.env` files to GitHub. Keep secrets in environment variables or local configuration files ignored by Git.
+
+## Author
+
+**Furkan Karabey**
